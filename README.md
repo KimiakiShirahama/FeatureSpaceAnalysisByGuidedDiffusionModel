@@ -12,11 +12,46 @@ conda activate ldm
 conda install pytorch torchvision cudatoolkit=11.3 -c pytorch
 pip install GPUtil
 pip install blobfile
-pip install facenet-pytorch
+pip install facenet-pytorch # This is necessary for pytorch's compatibility with CUDA
 pip install --upgrade transformers huggingface_hub requests
 ```
 
 To ease the reproduction of our decoder's results, we release Dockerfile to create the same environment as ours. Specifically, our decoder was implemented and tested on Ubuntu 22.04 and CUDA 11.7.1. Also, our anaconda environment was created by [this installer](https://repo.anaconda.com/archive/Anaconda3-2024.06-1-Linux-x86_64.sh).
+
+## Basic variables to run our decoder
+
+- `--optim_forward_guidance`: Flag to use the guidance to generate an image whose feature minimises its squared Euclidean distance to a user-specified one
+- `--optim_forward_guidance_wt`: Weight for the graident of the loss fuction ($w_g$ in the paper)
+- `--optim_num_steps`: Number of self-recurrence iterations ($K$ in the paper)
+- `--optim_grad_clip_threshold`: Threshold for gradient clipping ($\nabla_{thres}$ in the paper)
+- `--optim_folder`: Name of the output directory where the generated image as well as images at intermediate steps and the log file are stored
+- `--prompt`: Used to specify an image (png or jpg) or a text prompt from which the user-specified feature is extrated  
+
+## Image generation by targeting CLIP's image encoder with ResNet-50 backbone
+
+Using [CLIP's image encoder with ResNet-50 backbone](https://github.com/openai/CLIP) as the target feature extractor, the following command is used to generate an image whose feature closely matches the feature of the actual image, which is located at the top-left of Fig. 3 in the paper:
+```
+python scripts/clip_guided.py --optim_forward_guidance --optim_forward_guidance_wt 4 --optim_num_steps 8 --optim_grad_clip_threshold 3.0 --optim_folder data/bansal/og_img_0.png.generated_clip --optim_print --prompt data/bansal/og_img_0.png
+```
+
+The following command is used to generate an image whose feature closely matches the feature of the text prompt "A black motorbike parked on the dry ground", corresponding to the top-left caption in Fig. 8 of the paper:
+```
+python scripts/clip_guided.py --optim_forward_guidance --optim_forward_guidance_wt 4 --optim_num_steps 8 --optim_grad_clip_threshold 3.0 --optim_folder data/mscoco_data/txt_1.generated --optim_print --prompt "a black motorbike parked on the dry ground"
+```
+
+## Image generation by targeting ResNet-50
+
+Using ResNet-50, especially [ResNet-50 configured with ResNet50_Weights.IMAGENET1K_V1](https://docs.pytorch.org/vision/main/models/generated/torchvision.models.resnet50.html#torchvision.models.ResNet50_Weights), as the target feature extractor, the following command is used to generate an image whose feature closely matches the feature of the actual image, which is located at the top-left of Fig. 5 in the paper:
+```
+python scripts/resnet50_guided.py --optim_forward_guidance --optim_forward_guidance_wt 4 --optim_num_steps 8 --optim_grad_clip_threshold 3.0 --optim_folder data/bansal/og_img_0.png.generated_res --optim_print --prompt data/bansal/og_img_0.png
+```
+
+## Image generation by targeting Vision Transformer
+
+Using vision transformer, especially [ViT-H/14 configured with ViT_H_14_ Weights.IMAGENET1K_SWAG_E2E_V1](https://docs.pytorch.org/vision/main/models/generated/torchvision.models.vit_h_14.html#torchvision.models.ViT_H_14_Weights), as the target feature extractor, the following command is used to generate an image whose feature closely matches the feature of the actual image, which is located at the top-left of Fig. 7 in the paper:
+```
+python scripts/vith14_guided.py --optim_forward_guidance --optim_forward_guidance_wt 4 --optim_num_steps 8 --optim_grad_clip_threshold 2.0 --optim_folder data/bansal/og_img_0.png.generated_vit --optim_print --prompt data/bansal/og_img_0.png
+```
 
 ## High-resolution figures
 We had to compress the following figures containing many images due to the file size limitation during the paper preparation. Please click the links below to see the high-resolution versions: 
@@ -28,3 +63,19 @@ We had to compress the following figures containing many images due to the file 
 - [Figure 8](https://xxx)
 - [Figure 9](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EYvKeYjCbHBKhtTiUodXJ6QBFYtUzIzsLHFwf66OKCcguA?e=ANYCNB)
 - [Figure 11](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EURmEACQRlREp9uJpZkKvL0B6ple-gs-D3UpkXbqOwsHRw)
+
+## Reference
+If you found our decoder useful, please cite the following paper:
+
+```
+@article{shirahama2025fsa,
+    title={Feature Space Analysis by Guided Diffusion Model},
+    author={Shirahama, Kimiaki and Yanobu, Miki and Yamashita, Kaduki and Ohsaki, Miho},
+    journal={XXXX},
+    year={2025}
+}
+```
+
+## License
+
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
