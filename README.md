@@ -66,7 +66,7 @@ We had to compress the following figures containing many images due to the file 
 - [Figure 8](https://xxx)
 - [Figure 9](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EYvKeYjCbHBKhtTiUodXJ6QBFYtUzIzsLHFwf66OKCcguA?e=ANYCNB)
 - [Figure 11](https://xxxx)
-- [Figure 12][https://xxxx)
+- [Figure 12](https://xxxx)
 - [Figure 13](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EURmEACQRlREp9uJpZkKvL0B6ple-gs-D3UpkXbqOwsHRw)
 
 ## Reference
