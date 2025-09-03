@@ -551,7 +551,6 @@ class LatentDiffusion(DDPM):
         return denoise_grid
 
     def get_first_stage_encoding(self, encoder_posterior):
-        # pdb.set_trace()
         if isinstance(encoder_posterior, DiagonalGaussianDistribution):
             z = encoder_posterior.sample()
         elif isinstance(encoder_posterior, torch.Tensor):
@@ -701,7 +700,6 @@ class LatentDiffusion(DDPM):
         encoder_posterior = self.encode_first_stage(og_img)
         z = self.get_first_stage_encoding(encoder_posterior).detach()
         z = torch.randn_like(z)  # Initial z is a random Tensor of shape [1,4,64,64]
-        # pdb.set_trace()
 
         verbose = True
         timesteps = self.num_timesteps
@@ -714,23 +712,21 @@ class LatentDiffusion(DDPM):
         best_image_info = {"target":"best image", "t_id":-1, "rec_id":-1, "bk_id":-1, "val":-float("inf"), "image":None}
 
         # Record recent similarities to dynamically set the forward guidance weight (NOT USED)
-        # guidance_wt_info = [(1.0,4.0), (0.5,2.0), (0.1,1.0), (0.05,0.5), (0.01,0.25), (-1.0,0.0)]
         sim_history_size = operation.sim_history_size
         # Initialise sim_history with a very small similarity value
         sim_history = -100 * np.ones(sim_history_size)
         sim_history_count = 0
 
-        # fp = open(operation.loss_func.module.log_filename + "transition.txt", "w")
         for i in iterator:
             ts = torch.full((b,), i, device=device, dtype=torch.long)
             ts_1 = torch.full((b,), i - 1, device=device, dtype=torch.long)
             # start with z that is z_t
 
             num_step_length = len(operation.num_steps)
-            index = int(num_step_length * (ts[0] / self.num_timesteps))
-            # num_steps = operation.num_steps[index]
-            num_steps = 1000 if i >= 995 else operation.num_steps[0]
-
+            # More general implementation should be needed
+            index = 0 if i >= operation.early_emp_end else num_step_length - 1 
+            # index = int(num_step_length * (ts[0] / self.num_timesteps))
+            num_steps = operation.num_steps[index]
             loss = None
             _ = None
 
@@ -778,17 +774,10 @@ class LatentDiffusion(DDPM):
                         selected = self.check_image(op_im, operated_image, criterion, i, j, -1, best_image_info)
 
                     print(f"i:{i}th timestep, j:{j}th self-recurrence -> sim:{selected.item()}")
-                    # print(f"i:{i}th timestep, j:{j}th self-recurrence -> sim:{selected.item()}", file=fp)
                     sim_history[sim_history_count % sim_history_size] = selected.item()
-                    # print(f"sim_history_pos: {sim_history_count % sim_history_size}, sim_history: {sim_history}")
                     sim_history_count += 1
 
                     grad = th.autograd.grad(selected.sum(), z_in)[0]
-                    # np.save(
-                    #     f"{operation.folder}/grad_np_{i}_{j}.png",
-                    #     grad.to('cpu').detach().numpy().flatten()
-                    # )
-                    # print(f"!1 eps_org:{torch.linalg.norm(model_output):.6f}, forward weight:{operation.optim_guidance_3_wt}, grad:{torch.linalg.norm(grad):.6f} (grad clip threshold:{operation.grad_clip_threshold}) => ", end="", file=fp)
                     grad_norm = (torch.linalg.norm(model_output) / torch.linalg.norm(grad)) * grad
 
                     if operation.grad_clip_threshold > 0:
@@ -805,7 +794,6 @@ class LatentDiffusion(DDPM):
                     eps = model_output
                     eps = eps - (1 - alpha_bar).sqrt() * grad
                     """
-                    # print(f"eps:{torch.linalg.norm(eps):.6f}", file=fp)
 
                     del z_in
                     del selected
@@ -856,15 +844,9 @@ class LatentDiffusion(DDPM):
 
                         optimizer.zero_grad()
 
-                        # In the case of loss = (-100 x "normalised cossim (-1 to 1)"), 
-                        # loss ranges (best) -100 <= loss <= 100 (worst).
-                        # Thus, -100 + 0.00001 (default value of loss_cutoff) = -99.99999 is currently used
-                        # This part may be modified to use check_image
                         op_im = self.decode_first_stage_with_grad(z_recon) 
                         loss = -1 * self.check_image(op_im, operated_image, criterion, i, j+0.7, k, best_image_info)
-                        # loss = criterion(
-                        #     op_im, operated_image, {"t_id":i, "rec_id":j, "bk_id":k}
-                        # )
+
                         for __ in range(loss.shape[0]):
                             if loss[__] < loss_cutoff:
                                 weights[__] = zeros[__]
@@ -883,13 +865,11 @@ class LatentDiffusion(DDPM):
                         # The original values are used for pixels for which loss values are too small (< loss_cutoff)
                         with torch.no_grad():
                             z_recon.data = z_recon_before * (1 - weights) + weights * z_recon.data
-                            # recons_image.data = before_x * (1 - weights) + weights * recons_image.data
 
                         if weights.sum() == 0:
                             break
 
                     z_recon.requires_grad = False
-                    # recons_image.requires_grad = False
                     torch.set_grad_enabled(False)
 
                     recons_image = self.decode_first_stage(z_recon)
@@ -898,7 +878,6 @@ class LatentDiffusion(DDPM):
                         if i % operation.print_every == 0 and j == 0:
                             temp = (recons_image + 1) * 0.5
                             utils.save_image(temp, f'{operation.folder}/guidance_2_{i}_b.png')
-                    # pdb.set_trace()
 
                 # After "if operation.guidance_2:" 
                 if i != 0:
@@ -909,9 +888,6 @@ class LatentDiffusion(DDPM):
                     std_noise = torch.sqrt(extract_into_tensor(self.betas, ts, z.shape))
                     noise = torch.randn_like(z)
                     z_prev = coeff1 * (z - coeff2 * coeff3 * z_epsilon) + std_noise * noise
-                            # + torch.sqrt(extract_into_tensor(self.betas, ts, z.shape)) * torch.randn_like(z)
-                    # print(f"!2 inv_al_sq:{coeff1.item():.6f} * inv_1-al_bar_sq:{coeff2.item():.6f} * 1-al:{coeff3.item():.6f} * eps:{torch.linalg.norm(z_epsilon):.6f} => {(coeff1*coeff2*coeff3*torch.linalg.norm(z_epsilon)).item():.6f}", file=fp)
-                    # print(f"!3 inv_al_sq:{coeff1.item():.6f} * z:{torch.linalg.norm(z)} => {torch.linalg.norm(coeff1*z):.6f}, NOISE: std:{std_noise.item():.6f} * {torch.linalg.norm(noise):.6f} => {torch.linalg.norm(std_noise*noise):.6f} ===> z_prev:{torch.linalg.norm(z_prev):.6f}", file=fp)
                 else:
                     z_prev = z_recon
 
@@ -935,9 +911,6 @@ class LatentDiffusion(DDPM):
                     else:
                         z = z_prev
 
-            # if i == 980:  # After "for j in range(num_steps):"
-            #     pdb.set_trace()
-
         recons_image = self.decode_first_stage(z_prev)
         # Check the loss of the finally created image
         operation.loss_func(recons_image, operated_image, {"t_id":-1, "comment":"final image"})
@@ -947,8 +920,6 @@ class LatentDiffusion(DDPM):
             (best_image_info["image"] + 1) * 0.5,
             f'{operation.folder}/out_img_best_t_{best_image_info["t_id"]}_rec_{best_image_info["rec_id"]}_bk_{best_image_info["bk_id"]}_sim_{best_image_info["val"]:.6f}.png'
         )
-
-        # fp.close()
 
         return recons_image
 
@@ -1517,7 +1488,6 @@ class LatentDiffusion(DDPM):
                 cond = [cond]
             key = 'c_concat' if self.model.conditioning_key == 'concat' else 'c_crossattn'
             cond = {key: cond}
-        # pdb.set_trace()
 
         if hasattr(self, "split_input_params"):
             assert len(cond) == 1  # todo can only deal with one conditioning atm
@@ -2020,7 +1990,6 @@ class DiffusionWrapper(pl.LightningModule):
         assert self.conditioning_key in [None, 'concat', 'crossattn', 'hybrid', 'adm']
 
     def forward(self, x, t, c_concat: list = None, c_crossattn: list = None):
-        # pdb.set_trace()
         if self.conditioning_key is None:
             out = self.diffusion_model(x, t)
         elif self.conditioning_key == 'concat':

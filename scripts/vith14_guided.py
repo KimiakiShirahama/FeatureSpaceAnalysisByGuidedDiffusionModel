@@ -21,7 +21,6 @@ from ldm.models.diffusion.plms import PLMSSampler
 from diffusers.pipelines.stable_diffusion.safety_checker import StableDiffusionSafetyChecker
 from transformers import AutoFeatureExtractor
 from torchvision import transforms, utils
-# import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Subset
@@ -30,7 +29,6 @@ import PIL
 from torch.utils import data
 from pathlib import Path
 from PIL import Image
-# from torchvision import transforms, utils
 import random
 from helper import OptimizerDetails
 import clip
@@ -46,7 +44,6 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 
-# torch.manual_seed(0)
 
 # load safety model
 safety_model_id = "CompVis/stable-diffusion-safety-checker"
@@ -135,7 +132,6 @@ def cycle(dl):
         for data in dl:
             yield data
 
-import os
 import errno
 def create_folder(path):
     try:
@@ -157,7 +153,6 @@ class VitH14(nn.Module):
         vith14.heads.head.eval()
         for param in vith14.parameters():
             param.requires_grad = False
-        # pdb.set_trace()
 
         self.model = vith14
         self.preprocess = transforms.Compose([
@@ -169,7 +164,6 @@ class VitH14(nn.Module):
         print(self.preprocess)
         self.trans = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self.log_filename = log_filename
-        # pdb.set_trace()
 
     def forward(self, x, y, log_info=None):
         x = (x + 1) * 0.5
@@ -177,8 +171,6 @@ class VitH14(nn.Module):
         # Virtual save image to precisely simulated that x (image) is loaded and encoded into a Clip's embedding
         x = x.mul(255)
         x = x + x.round().detach() - x.detach()  # Straight through estimator to backpropagte across round function 
-        # print("image")
-        # print(x)
 
         # Processes needed to complete the preprocessing of Resnet50
         # Since x is originally 512x512 in our LDM, centre crop is not needed
@@ -189,7 +181,7 @@ class VitH14(nn.Module):
 
         # Cast xfeats and yfeats to float32 to improve the computational precision
         xfeats = self.model(x).to(torch.float32)
-        yfeats = y.to(torch.float32)  # self.model.encode_text(y).to(torch.float32)
+        yfeats = y.to(torch.float32)
 
         # Batch computation of the squared Euclidian distances for rows in xfeats and those in yfeats
         # (the resulting matrix is (# of xfeat's rows x # of yfeat's row)), although it is not needed
@@ -197,18 +189,8 @@ class VitH14(nn.Module):
         y_sq = torch.sum(yfeats**2, dim=1, keepdim=True).T
         xy = torch.mm(xfeats, yfeats.T)
         xy_dists = x_sq + y_sq - 2.0 * xy
-        # xy_dists_check = torch.sum((xfeats - yfeats)**2)
-        # print(f"xy_dists: {xy_dists.item()}")  # (check: {xy_dists_check.item()})")
-
-        # logits_per_image, logits_per_text = self.model(x, y)
 
         if self.log_filename != None and log_info != None:
-            # FYI: Check the cosine similarity between xfeats and yfeats
-            # (Normalisation is performed according to CLIP's forward in src/clip/clip/model.py)
-            # xfeats2 = xfeats / xfeats.norm(dim=1, keepdim=True)
-            # yfeats2 = yfeats / yfeats.norm(dim=1, keepdim=True)
-            # logit_scale = self.model.logit_scale.exp()
-            # xy_cossim = logit_scale * xfeats2 @ yfeats2.t()
             with open(self.log_filename, mode='a') as f:
                 if "bk_id" in log_info:  # Backward guidance where rec_iter_id is assumed to be specified
                     print(f'{log_info["t_id"]}th timestep, {log_info["rec_id"]}th self-recurrence, {log_info["bk_id"]}th backward iteration', end="", file=f)
@@ -221,7 +203,6 @@ class VitH14(nn.Module):
                 print(f" -> xy_dists:{xy_dists.item()}", file=f)
 
         return xy_dists
-        # return -1 * logits_per_image
 
     def get_image_embedding(self, img):
         return self.model(img)
@@ -241,6 +222,7 @@ def get_optimation_details(args):
     operation.image_W = args.W
     
     operation.num_steps = args.optim_num_steps
+    operation.early_emp_end = args.optim_early_emp_end
     operation.select_z_prev = args.optim_select_prev
     operation.operation_func = None
     operation.other_guidance_func = None
@@ -411,6 +393,7 @@ def main():
     parser.add_argument('--optim_aug', action='store_true', default=False)
     parser.add_argument('--optim_folder', default='./results/')
     parser.add_argument("--optim_num_steps", nargs="+", default=[1], type=int)
+    parser.add_argument("--optim_early_emp_end", default=-1, type=int)
     parser.add_argument("--optim_select_prev", action='store_true', default=False)
     parser.add_argument("--optim_mask_fraction", default=0.5, type=float)
     parser.add_argument("--text", default=None)
@@ -423,7 +406,6 @@ def main():
     create_folder(results_folder)
     # Add the path of a log file
     opt.optim_log_filename = os.path.join(opt.optim_folder, "log.txt")
-    # pdb.set_trace()
 
     config = OmegaConf.load(f"{opt.config}")
     model = load_model_from_config(config, f"{opt.ckpt}")
@@ -443,7 +425,6 @@ def main():
     else:
         raise ValueError(f"This code only supports image feature guidance")
     print(f"Goal embedding: {goal_emb}")
-    # pdb.set_trace()
 
     # A fixed embedding (condition) to make the image generation uncoditional 
     cond = model.module.get_learned_conditioning([""])
