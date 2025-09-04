@@ -6,7 +6,7 @@ One of the key issues in Deep Neural Networks (DNNs) is the black-box nature of 
 <img width="800" src="https://github.com/KimiakiShirahama/FeatureSpaceAnalysisByGuidedDiffusionModel/blob/main/data/overview.png">
 
 ## Instllation
-Our decoder has been implemented by modifying a [**universal guided diffusion model** developed by A. Bansal *et al.*](https://github.com/arpitbansal297/Universal-Guided-Diffusion) and runs in the same environment as it. This environment can be constructed by the following commands   
+Our decoder has been implemented by modifying a [**universal guided diffusion model** developed by A. Bansal *et al.*](https://github.com/arpitbansal297/Universal-Guided-Diffusion) and runs in the same environment as it. This environment can be constructed by the following commands:   
 ```
 conda env create -f environment.yaml
 conda activate ldm
@@ -20,6 +20,12 @@ pip install --upgrade transformers huggingface_hub requests
 To ease the reproduction of our decoder's results, we release Dockerfile to create the same environment as ours. Specifically, our decoder was implemented and tested on Ubuntu 22.04 and CUDA 11.7.1. Also, our anaconda environment was created by [this installer](https://repo.anaconda.com/archive/Anaconda3-2024.06-1-Linux-x86_64.sh).
 
 The stable diffusion (`sd-v1-4.ckpt`) that is used as a background diffusion model of our decoder can be found [here](https://huggingface.co/CompVis/stable-diffusion-v-1-4-original) and should be placed in `models/ldm/`. 
+
+If you have an error like `ImportError: libgthread-2.0.so.0: cannot open shared object file: No such file or directory`, please try the following commands:
+```
+pip uninstall opencv-python
+pip install opencv-python-headless
+```
 
 ## Basic variables to run our decoder
 
