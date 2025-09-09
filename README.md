@@ -28,7 +28,7 @@ The stable diffusion (`sd-v1-4.ckpt`) that is used as a background diffusion mod
 - `--optim_num_steps`: Number of self-recurrence iterations ($K$ in the paper, multiple numbers can be specified)
 - `--optim_early_emp_end`: Index of the last step for which the early step emphasis is used ($T - T'$ in the paper)
 - `--optim_grad_clip_threshold`: Threshold for gradient clipping ($\nabla_{thres}$ in the paper)
-- `--optim_folder`: Name of the output directory where the generated image as well as images at intermediate steps and the log file are stored
+- `--optim_folder`: Name of the output directory where the generated image as well as images at intermediate steps and the log file are stored. The finally generated image and the best image are saved into `out_img.png` and `out_img_best_t_<step #>_rec_<self rec. #>_bk_-1_sim_-<squared Euclidean distance>.png`, respectively. 
 - `--prompt`: Used to specify an image (png or jpg) or a text prompt from which the user-specified feature is extrated  
 
 Please check `scripts/clip_guided.py`, `scripts/resnet50_guided.py` or `scripts/vith14_guided.py` for more details about variables.
