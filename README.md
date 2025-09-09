@@ -63,15 +63,15 @@ python scripts/vith14_guided.py --optim_forward_guidance --optim_forward_guidanc
 
 ## High-resolution figures
 We had to compress the following figures containing many images due to the file size limitation during the paper preparation. Please click the links below to see the high-resolution versions: 
-- [Figure 3](https://xxx)
-- [Figure 4](https://xxx)
-- [Figure 5](https://xxx)
-- [Figure 6](https://xxx)
-- [Figure 7](https://xxx)
-- [Figure 8](https://xxx)
+- [Figure 3](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/Ec8ZKwGRp8lDgrXJx8uRQa4BDYVSYaxCkAGU1OjiiVn81w?e=rXmJK2)
+- [Figure 4](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/ERtabsfWrURPqZvrOMdnBb0B4eqCs9IdN9SmmODKLhovFw?e=Lbr67P)
+- [Figure 5](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EeVv0oVRlQpKuVrSrfbJSg8B40TkDFAqWsqZw5dDMkjtqA?e=w676TZ)
+- [Figure 6](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EdemQyh1zxtIgzj2jQ4UlMABWQj67FPOMmf8YTk5_Xg69w?e=NE0Xey)
+- [Figure 7](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EVwqCxbTlIFAvuCxaTjG9QwBAsbjKkqhd7i9HbMwx4fTiw?e=j2YPnj)
+- [Figure 8](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EYQFEBjkf_hDmOCKmWYkc1sBGbdqOHLH4b3SYMXj_1tO1w?e=RGOvPa)
 - [Figure 9](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EYvKeYjCbHBKhtTiUodXJ6QBFYtUzIzsLHFwf66OKCcguA?e=ANYCNB)
-- [Figure 11](https://xxxx)
-- [Figure 12](https://xxxx)
+- [Figure 11](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EdyUQ1zCqVJJq0w4_96EhPQBSWzJ0AyQCVy_k3_Onm1YEg?e=f1RBCQ)
+- [Figure 12](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/ETODzGQpqv1Ku-m7v8hhFmUBXKbqO2ClsXq566ql1v96kQ?e=dSIUwf)
 - [Figure 13](https://doshishaacjp-my.sharepoint.com/:b:/g/personal/kshiraha_mail_doshisha_ac_jp/EURmEACQRlREp9uJpZkKvL0B6ple-gs-D3UpkXbqOwsHRw)
 
 ## Reference
