@@ -81,7 +81,7 @@ If you found our decoder useful, please cite the following paper:
 @article{shirahama2025fsa,
     title={Feature Space Analysis by Guided Diffusion Model},
     author={Shirahama, Kimiaki and Yanobu, Miki and Yamashita, Kaduki and Ohsaki, Miho},
-    journal={XXXX},
+    journal={arXiv e-prints arXiv:2509.07936},
     year={2025}
 }
 ```
